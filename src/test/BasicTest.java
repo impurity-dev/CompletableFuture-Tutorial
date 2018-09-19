@@ -159,5 +159,15 @@ public class BasicTest {
         Payload result = completableFuture.join();
     }
 
+    @Test
+    // TODO: Add Explanation
+    public void obtrudeException() {
 
+    }
+
+    @Test
+    // TODO: Add Explanation
+    public void obtrudeValue() {
+
+    }
 }
