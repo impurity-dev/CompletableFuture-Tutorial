@@ -56,4 +56,13 @@ public class Transport {
        throw new Exception("Transport Failure");
     }
 
+    public Payload sleep(Payload payload) {
+        try {
+            Thread.sleep(1_000_000_000);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+        return payload;
+    }
+
 }

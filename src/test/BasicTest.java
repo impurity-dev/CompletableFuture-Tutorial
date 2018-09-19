@@ -10,25 +10,25 @@ import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 public class BasicTest {
 
     private static Payload<String> defaultStringPayload;
     private static Payload<Integer> defaultIntPayload;
     private static Transport transportSmall;
-    private static Transport getTransportMedium;
+    private static Transport transportMedium;
     private static Transport transportLarge;
+    private static Transport transportExtraLarge;
 
     @BeforeClass
     public static void setUp() {
         defaultStringPayload = new Payload<>("Default", "I am the default String payload", null);
         defaultIntPayload = new Payload<>("Default", 10, null);
         transportSmall = new Transport(true, 10);
-        getTransportMedium = new Transport(false, 1000);
-        transportLarge = new Transport(false, 100000);
+        transportMedium = new Transport(false, 1_000);
+        transportLarge = new Transport(false, 100_000);
+        transportExtraLarge = new Transport(false, 1_000_000_000);
     }
 
     @AfterClass
@@ -122,16 +122,31 @@ public class BasicTest {
 
     @Test
     // TODO: Add Explanation
-    public void get(){
+    public void get() throws Exception {
         // Begin lengthy computations
-        CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
+        CompletableFuture<Payload> completableFuture_1 = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
+        // Blocks and waits to grab the result and throws Checked and Unchecked exceptions
+        Payload result_1 = completableFuture_1.get();
+        // Finished properly
+        assertTrue(completableFuture_1.isDone());
+        // Payload was the desired payload
+        assertEquals(result_1, defaultStringPayload);
 
-        try {
-            // Blocks and waits to grab the result
-            Payload result = completableFuture.get();
-        } catch(Exception e) {
-            System.err.println(e.getMessage());
-        }
+
+        CompletableFuture<Payload> completableFuture_2 = CompletableFuture.supplyAsync(() -> transportLarge.sleep(defaultStringPayload));
+        // Blocks and waits to grab the result for 1 second then continues
+        // Timeout exception to break out of the blocking
+        assertThrows(TimeoutException.class, () -> completableFuture_2.get(1, TimeUnit.NANOSECONDS));
+        // Never got to finish
+        assertFalse(completableFuture_2.isDone());
+
+        CompletableFuture<Payload> completableFuture_3 = CompletableFuture.supplyAsync(() -> transportLarge.sleep(defaultStringPayload));
+        // Blocks and waits to grab the result and throws Checked and Unchecked exceptions
+        Payload result_3 = completableFuture_3.getNow(defaultIntPayload);
+        // Finished with given result
+        assertEquals(result_3, defaultIntPayload);
+        // Never got to finish
+        assertFalse(completableFuture_2.isDone());
     }
 
     @Test
@@ -140,7 +155,9 @@ public class BasicTest {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
 
-        // Blocks and waits for result
+        // Blocks and waits for result and throws Unchecked CompletionException
         Payload result = completableFuture.join();
     }
+
+
 }
