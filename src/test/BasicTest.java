@@ -4,11 +4,12 @@ import mock.Payload;
 import mock.Transport;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 
 public class BasicTest {
-
     @Test
     public void instantiation() {
         CompletableFuture<Payload> completableFuture = new CompletableFuture<>();
@@ -20,34 +21,65 @@ public class BasicTest {
     }
 
     @Test
-    public void supplyAndRun() {
+    public void supplyAsync() throws Exception {
+        Payload<String> payload_1 = new Payload<>("Default", "I am the default payload", null);
+        Transport transport = new Transport(10);
 
+        // Begin lengthy computation with a result to be returned
+        CompletableFuture<Payload> completableFuture_1 = CompletableFuture.supplyAsync(() -> transport.deliveryPayload(payload_1));
+
+        // Grab that result when it has finished completing
+        Payload result_1 = completableFuture_1.get(); // Block until completion
+        System.out.println(String.format("%s has finished with this payload: \"%s\"", result_1.getName(), result_1.getContents()));
     }
 
     @Test
-    public void forced_completions() {
+    public void runAsync() throws Exception {
+        Payload<String> payload_1 = new Payload<>("Default", "I am the default payload", null);
+        Transport transport = new Transport(10);
+
+        // Begin lengthy computation with no result anticipated
+        CompletableFuture completableFuture_1 = CompletableFuture.runAsync(() -> transport.transportPayload(payload_1));
+        completableFuture_1.get(); // Block until completion
+        System.out.println("Future has completed");
+    }
+
+    @Test
+    public void complete() throws Exception {
         Payload<String> payload_1 = new Payload<>("Default", "I am the default payload", null);
         Payload<String> payload_2 = new Payload<String>("New", "I am the new payload", null);
         Transport transport = new Transport(10000);
 
         // Begin lengthy computations
-        CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transport.TransportPayload(payload_1));
+        CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transport.deliveryPayload(payload_1));
 
         // End instantly with custom completion payload
         completableFuture.complete(payload_2);
-        try {
-            // The future is indeed finished
-            assertTrue(completableFuture.isDone());
-            // But it was not cancelled
-            assertFalse(completableFuture.isCancelled());
-            // And its result is the payload_2 provided in the complete function
-            assertEquals(completableFuture.get(), payload_2);
-        } catch(Exception e) {
-            System.err.println("Error getting payload in forced_completions");
-        }
+        // The future is indeed finished
+        assertTrue(completableFuture.isDone());
+        // But it was not cancelled
+        assertFalse(completableFuture.isCancelled());
+        // And its result is the payload_2 provided in the complete function
+        assertEquals(completableFuture.get(), payload_2);
+    }
+
+    @Test
+    public void cancel() {
+        Payload<String> payload_1 = new Payload<>("Default", "I am the default payload", null);
+        Payload<String> payload_2 = new Payload<String>("New", "I am the new payload", null);
+        Transport transport = new Transport(10000);
 
         // Begin lengthy computations
-        completableFuture = CompletableFuture.supplyAsync(() -> transport.TransportPayload(payload_1));
+        CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transport.deliveryPayload(payload_1));
 
+        // End instantly. The param states that it will not
+        completableFuture.cancel(true);
+
+        // The future is indeed finished
+        assertTrue(completableFuture.isDone());
+        // And it was canceled
+        assertTrue(completableFuture.isCancelled());
+        // And its result is the payload_2 provided in the complete function
+        assertThrows(CancellationException.class, completableFuture::get);
     }
 }
