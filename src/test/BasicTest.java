@@ -20,6 +20,7 @@ public class BasicTest {
     }
 
     @Test
+    // TODO: Add Explanation
     public void instantiation() {
         CompletableFuture<Payload> completableFuture = new CompletableFuture<>();
 
@@ -30,6 +31,7 @@ public class BasicTest {
     }
 
     @Test
+    // TODO: Add Explanation
     public void supplyAsync() throws Exception {
         Payload<String> payload_1 = new Payload<>("Default", "I am the default payload", null);
         Transport transport = new Transport(10);
@@ -43,6 +45,7 @@ public class BasicTest {
     }
 
     @Test
+    // TODO: Add Explanation
     public void runAsync() throws Exception {
         Payload<String> payload_1 = new Payload<>("Default", "I am the default payload", null);
         Transport transport = new Transport(10);
@@ -54,6 +57,7 @@ public class BasicTest {
     }
 
     @Test
+    // TODO: Add Explanation
     public void complete() throws Exception {
         Payload<String> payload_1 = new Payload<>("Default", "I am the default payload", null);
         Payload<String> payload_2 = new Payload<String>("New", "I am the new payload", null);
@@ -73,6 +77,7 @@ public class BasicTest {
     }
 
     @Test
+    // TODO: Add Explanation
     public void cancel() throws Exception  {
         Payload<String> payload = new Payload<>("Default", "I am the default payload", null);
         Transport transport = new Transport(10000);
@@ -95,6 +100,7 @@ public class BasicTest {
     }
 
     @Test
+    // TODO: Add Explanation
     public void completeExceptionally() {
         Payload<String> payload = new Payload<>("Default", "I am the default payload", null);
         Transport transport = new Transport(10000);
@@ -103,13 +109,13 @@ public class BasicTest {
         CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transport.deliveryPayload(payload));
 
         // End instantly - Bool determines if it should can be interrupted
-        completableFuture.completeExceptionally(new Exception("Complete Exceptionally"));
+        completableFuture.completeExceptionally(new IllegalAccessException("Complete Exceptionally"));
 
         // The future is indeed finished
         assertTrue(completableFuture.isDone());
         // And it was not cancelled
         assertFalse(completableFuture.isCancelled());
         // And its result will throw the provided exception in the completeExceptionally
-        assertThrows(Exception.class, completableFuture::get);
+        assertThrows(IllegalAccessException.class, completableFuture::get);
     }
 }
