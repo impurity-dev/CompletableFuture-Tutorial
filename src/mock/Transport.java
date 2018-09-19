@@ -2,8 +2,10 @@ package mock;
 
 public class Transport {
     private int iterations;
+    private boolean shouldLog;
 
-    public Transport(int iterations) {
+    public Transport(boolean shouldLog, int iterations) {
+        this.shouldLog = shouldLog;
         this.iterations = iterations;
     }
 
@@ -36,8 +38,11 @@ public class Transport {
      */
     public void transportPayload(Payload payload) {
         for(int i = 0; i < iterations; i++) {
-            System.out.println(String.format("Payload: %s has moved to its %2d position", payload.getName(), i + 1));
+            if(shouldLog)
+                System.out.println(String.format("Payload: %s has moved to its %2d position", payload.getName(), i + 1));
         }
+
+        System.out.println(String.format("Payload: %s has finished!", payload.getName()));
     }
 
     /**
