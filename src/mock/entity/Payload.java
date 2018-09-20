@@ -1,6 +1,8 @@
-package mock;
+package mock.entity;
 
 import org.junit.runner.notification.RunListener.ThreadSafe;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A thread-safe mock payload class that must be delivered to a destination
@@ -14,7 +16,7 @@ public class Payload<T> {
     private Destination currentLocation;
     private T contents;
     private String name;
-    private final Object lock = new Object();
+    private final ConcurrentLinkedQueue<Payload> bundle;
 
     /**
      * Mock payload implementation
@@ -26,6 +28,7 @@ public class Payload<T> {
     public Payload(String name, T contents) {
         this.name = name;
         this.contents = contents;
+        this.bundle = new ConcurrentLinkedQueue<>();
     }
 
     /**
@@ -42,6 +45,7 @@ public class Payload<T> {
         this.contents = contents;
         this.destination = destination;
         this.origin = origin;
+        this.bundle = new ConcurrentLinkedQueue<>();
     }
 
     /**
@@ -94,5 +98,22 @@ public class Payload<T> {
      */
     public Destination getDestination() {
         return destination;
+    }
+
+    /**
+     * A way of bundling payloads together into
+     * @param newBundleObject - new payload to add to the current payload
+     */
+    public synchronized void addBundle(Payload newBundleObject) {
+        bundle.add(newBundleObject);
+    }
+
+    /**
+     * Get the payloads current bundle
+     *
+     * @return all the bundled objects with this payload
+     */
+    public synchronized ConcurrentLinkedQueue<Payload> getBundle() {
+        return bundle;
     }
 }

@@ -1,7 +1,7 @@
 package test;
 
-import mock.Payload;
-import mock.Transport;
+import mock.entity.Payload;
+import mock.entity.Transport;
 import static org.junit.Assert.*;
 
 import org.junit.AfterClass;

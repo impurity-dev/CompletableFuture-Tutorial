@@ -1,4 +1,4 @@
-package mock;
+package mock.entity;
 
 public class Transport {
     private int iterations;

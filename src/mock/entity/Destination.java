@@ -1,4 +1,4 @@
-package mock;
+package mock.entity;
 
 public class Destination {
     private String name;
