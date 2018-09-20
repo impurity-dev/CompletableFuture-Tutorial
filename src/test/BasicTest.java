@@ -7,8 +7,10 @@ import static org.junit.Assert.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.concurrent.*;
 
@@ -81,6 +83,11 @@ public class BasicTest {
         assertFalse(completableFuture.isCancelled());
         // And its result is the payload_2 provided in the complete function
         assertEquals(completableFuture.get(), defaultIntPayload);
+
+        // Will be ignored since it has already completed
+        completableFuture.complete(defaultStringPayload);
+        // Contains the first complete() call's param
+        assertEquals(defaultIntPayload, completableFuture.get());
     }
 
     @Test
@@ -161,13 +168,43 @@ public class BasicTest {
 
     @Test
     // TODO: Add Explanation
-    public void obtrudeException() {
+    public void obtrudeException() throws Exception {
+        // Begin lengthy computations
+        CompletableFuture<Payload> completableFuture_1 = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
+
+        // Forcibly complete with an exception
+        completableFuture_1.obtrudeException(new IllegalArgumentException("Fake Exception"));
+        assertTrue(completableFuture_1.isDone());
+        assertFalse(completableFuture_1.isCancelled());
+        assertTrue(completableFuture_1.isCompletedExceptionally());
+
+
+        // Begin lengthy computations
+        CompletableFuture<Payload> completableFuture_2 = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
+        assertDoesNotThrow((Executable) completableFuture_2::get);
+        assertEquals(defaultStringPayload, completableFuture_2.get());
+
+        // Forcibly complete and overrides the value if already completed
+        completableFuture_2.obtrudeException(new IllegalArgumentException("Fake Exception"));
+        assertTrue(completableFuture_2.isDone());
+        assertFalse(completableFuture_2.isCancelled());
+        assertTrue(completableFuture_2.isCompletedExceptionally());
+        // The get, although prior to the obtrude was completed and did not throw an exception, now throws one
+        assertThrows(ExecutionException.class, completableFuture_2::get);
 
     }
 
     @Test
     // TODO: Add Explanation
-    public void obtrudeValue() {
+    public void obtrudeValue() throws Exception {
+        // Begin lengthy computations
+        CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportSmall.deliveryPayload(defaultStringPayload));
+        // And its result is the payload_2 provided in the complete function
+        assertEquals(completableFuture.get(), defaultStringPayload);
 
+        // Will override the existing value from the completion
+        completableFuture.obtrudeValue(defaultIntPayload);
+        // Contains the obtrudeValue() call's param
+        assertEquals(defaultIntPayload, completableFuture.get());
     }
 }

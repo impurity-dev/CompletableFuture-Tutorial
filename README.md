@@ -11,4 +11,4 @@ TODO
 Java SE 8^
 
 ## API
-https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html
+https://docs.oracle.com/javase/10/docs/api/java/util/concurrent/CompletableFuture.html
