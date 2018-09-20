@@ -25,8 +25,8 @@ public class BasicTest {
 
     @BeforeClass
     public static void setUp() {
-        defaultStringPayload = new Payload<>("Default", "I am the default String payload", null);
-        defaultIntPayload = new Payload<>("Default", 10, null);
+        defaultStringPayload = new Payload<>("Default", "I am the default String payload");
+        defaultIntPayload = new Payload<>("Default", 10);
         transportSmall = new Transport(true, 10);
         transportMedium = new Transport(false, 1_000);
         transportLarge = new Transport(false, 100_000);
