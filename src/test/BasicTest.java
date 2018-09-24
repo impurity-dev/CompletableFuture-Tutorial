@@ -39,7 +39,7 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Utilizing the default constructor to show the init states of the object
     public void instantiation() {
         CompletableFuture<Payload> completableFuture = new CompletableFuture<>();
 
@@ -50,7 +50,8 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Returns a new CompletableFuture that is asynchronously completed by a task running in the
+    // ForkJoinPool.commonPool() with the value obtained by calling the given Supplier.
     public void supplyAsync() throws Exception {
         // Begin lengthy computation with a result to be returned
         CompletableFuture<Payload> completableFuture_1 = CompletableFuture.supplyAsync(() -> transportSmall.deliveryPayload(defaultStringPayload));
@@ -61,7 +62,8 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Returns a new CompletableFuture that is asynchronously completed by a task running
+    // in the ForkJoinPool.commonPool() after it runs the given action.
     public void runAsync() throws Exception {
         // Begin lengthy computation with no result anticipated
         CompletableFuture completableFuture_1 = CompletableFuture.runAsync(() -> transportSmall.transportPayload(defaultStringPayload));
@@ -70,7 +72,7 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // If not already completed, sets the value returned by get() and related methods to the given value.
     public void complete() throws Exception {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
@@ -91,7 +93,7 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // If not already completed, completes this CompletableFuture with a CancellationException.
     public void cancel() throws Exception  {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
@@ -111,7 +113,7 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // If not already completed, causes invocations of get() and related methods to throw the given exception.
     public void completeExceptionally() {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
@@ -128,7 +130,8 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Completes this CompletableFuture with the result of the given Supplier function invoked
+    // from an asynchronous task using the default executor.
     public void completeAsync() throws Exception {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportLarge.sleep(defaultStringPayload));
@@ -145,7 +148,7 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Completes this CompletableFuture with the given value if not otherwise completed before the given timeout.
     public void completeOnTimeout() throws Exception {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportLarge.sleep(defaultStringPayload));
@@ -162,7 +165,7 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Waits if necessary for this future to complete, and then returns its result.
     public void get() throws Exception {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture_1 = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
@@ -191,7 +194,7 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Returns the result value when complete, or throws an (unchecked) exception if completed exceptionally.
     public void join() {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
@@ -201,7 +204,8 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Forcibly causes subsequent invocations of method get() and related methods to
+    // throw the given exception, whether or not already completed.
     public void obtrudeException() throws Exception {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture_1 = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
@@ -229,7 +233,7 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Forcibly sets or resets the value subsequently returned by method get() and related methods, whether or not already completed.
     public void obtrudeValue() throws Exception {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportSmall.deliveryPayload(defaultStringPayload));
@@ -243,7 +247,7 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Returns a new CompletableFuture that is already completed with the given value.
     public void completedFuture() throws Exception {
         // Created a completed future
         CompletableFuture<Payload> completableFuture = CompletableFuture.completedFuture(defaultStringPayload);
@@ -254,7 +258,8 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Returns a new CompletionStage that is already completed with the given
+    // value and supports only those methods in interface CompletionStage.
     public void completedStage() {
         // Create a completed completion stage
         CompletionStage<Payload> completionStage = CompletableFuture.completedStage(defaultStringPayload);
@@ -264,7 +269,7 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Returns a new CompletableFuture that is already completed exceptionally with the given exception.
     public void failedFuture() {
         // Create a completed completion stage
         CompletableFuture<Payload> completableFuture = CompletableFuture.failedFuture(new Exception("Failed Future"));
@@ -276,7 +281,8 @@ public class BasicTest {
     }
 
     @Test
-    // TODO: Add Explanation
+    // Returns a new CompletionStage that is already completed exceptionally with the given
+    // exception and supports only those methods in interface CompletionStage.
     public void failedStage() {
         // Create a completed failed stage
         CompletionStage<Payload> completionStage = CompletableFuture.failedStage(new Exception("Failed Stage"));

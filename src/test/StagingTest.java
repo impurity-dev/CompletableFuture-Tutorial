@@ -39,7 +39,8 @@ public class StagingTest {
     }
 
     @Test
-    // TODO: Explanation
+    // Returns a new CompletionStage that, when this stage completes normally,
+    // is executed with this stage's result as the argument to the supplied function.
     public void thenApply() throws Exception {
         // The payload we will be operating on currently has no bundle
         assertNull(defaultIntPayload.getBundle().peek());
@@ -55,29 +56,83 @@ public class StagingTest {
         // Await its finish
         completableFuture.join();
 
+        // Should be done
+        assertTrue(completableFuture.isDone());
         // The payload should have been modified to have a bundle
         assertEquals(completableFuture.get().getBundle().peek(), defaultStringPayload);
     }
 
     @Test
-    // TODO: Explanation
-    public void thenApplyAsync() throws Exception  {
+    // Returns a new CompletionStage that, when this stage completes normally,
+    // executes the given action.
+    public void thenRun() {
+        // Create our future
+        // Once done, lets execute some logic AFTER the first stage finishes
+        CompletableFuture<Void> completableFuture = CompletableFuture
+                .supplyAsync(() -> transportSmall.deliveryPayload(defaultIntPayload))
+                .thenRunAsync(() -> System.out.println("DONE!"));
+        // Await its finish
+        completableFuture.join();
+        // Should be done
+        assertTrue(completableFuture.isDone());
+    }
+
+    @Test
+    // Returns a new CompletionStage that, when this stage completes normally,
+    // is executed with this stage's result as the argument to the supplied action.
+    public void thenAccept() {
         // The payload we will be operating on currently has no bundle
         assertNull(defaultIntPayload.getBundle().peek());
 
         // Create our future
-        // Once done, lets modify our payload by adding a bundle to it in a NON-BLOCKING manner
-        CompletableFuture<Payload> completableFuture = CompletableFuture
+        // Once done, lets modify our payload by adding a bundle to it in a BLOCKING manner
+        CompletableFuture<Void> completableFuture = CompletableFuture
                 .supplyAsync(() -> transportSmall.deliveryPayload(defaultIntPayload))
-                .thenApply(payload ->  {
-                    payload.addBundle(defaultStringPayload);
-                    return payload;
-                });
+                .thenAcceptAsync(payload ->  payload.addBundle(defaultStringPayload));
         // Await its finish
         completableFuture.join();
 
+        // Should be done
+        assertTrue(completableFuture.isDone());
         // The payload should have been modified to have a bundle
-        assertEquals(completableFuture.get().getBundle().peek(), defaultStringPayload);
+        assertEquals(defaultIntPayload.getBundle().peek(), defaultStringPayload);
     }
 
+    @Test
+    // Returns a new CompletionStage that is completed with the same value as
+    // the CompletionStage returned by the given function.
+    public void thenCombine() throws Exception {
+        // Create our future
+        CompletableFuture<Payload> completableFuture_1 = CompletableFuture.supplyAsync(() -> transportSmall.deliveryPayload(defaultIntPayload));
+        CompletableFuture<Payload> completableFuture_2 = CompletableFuture.supplyAsync(() -> transportSmall.deliveryPayload(defaultStringPayload));
+        CompletableFuture<Payload> completableFuture_3 = completableFuture_1.thenCombine(completableFuture_2, (s1, s2) -> {
+            s1.getBundle().add(s2);
+            return s1;
+        });
+        // Wait for it to finish
+        completableFuture_3.join();
+
+        // Ensure that the combination was proper
+        assertNotNull(completableFuture_3.get().getBundle().peek());
+        assertEquals(completableFuture_3.get().getBundle().peek(), defaultStringPayload);
+    }
+
+    @Test
+    // Returns a new CompletionStage that, when this stage completes normally,
+    // is executed with this stage as the argument to the supplied function.
+    public void thenCompose() {
+        // Create our future
+        CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportSmall.deliveryPayload(defaultIntPayload))
+                .thenComposeAsync((result) -> CompletableFuture.supplyAsync(() -> {
+                    result.getBundle().add(defaultStringPayload);
+                    return result;
+                }));
+
+        // Wait for it to finish
+        completableFuture.join();
+
+        // Ensure that the combination was proper
+        assertNotNull(defaultIntPayload.getBundle().peek());
+        assertEquals(defaultIntPayload.getBundle().peek(), defaultStringPayload);
+    }
 }
