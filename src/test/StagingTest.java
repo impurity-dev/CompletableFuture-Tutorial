@@ -6,12 +6,8 @@ import static org.junit.Assert.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.util.ArrayList;
 import java.util.concurrent.*;
 
 public class StagingTest {
@@ -134,5 +130,47 @@ public class StagingTest {
         // Ensure that the combination was proper
         assertNotNull(defaultIntPayload.getBundle().peek());
         assertEquals(defaultIntPayload.getBundle().peek(), defaultStringPayload);
+    }
+
+    @Test
+    // Returns a new CompletionStage that, when this stage completes either normally or exceptionally,
+    // is executed with this stage's result and exception as arguments to the supplied function.
+    public void handle() throws Exception {
+        // Create a future that has a handle that will execute no matter how this completes
+        CompletableFuture<Payload> completableFuture_1 = CompletableFuture
+                .supplyAsync(() -> transportLarge.deliveryPayload(defaultIntPayload))
+                .handle((result, throwable) -> {
+                    if(result != null) {
+                        defaultIntPayload.getBundle().add(defaultStringPayload);
+                        return result;
+                    }
+                    System.err.println("Error arose: " + throwable.getMessage());
+                    return null;
+                });
+
+        // Grab the result
+        Payload resultPayload = completableFuture_1.get();
+
+        // It properly executed
+        assertEquals(resultPayload.getBundle().peek(), defaultStringPayload);
+    }
+
+    @Test
+    // Returns a new CompletionStage that, when this stage completes exceptionally,
+    // is executed with this stage's exception as the argument to the supplied function.
+    public void exceptionally() {
+        // Create a future that has a handle that will execute no matter how this completes
+        CompletableFuture completableFuture = CompletableFuture
+                .supplyAsync(() -> transportExtraLarge.sleep(defaultIntPayload))
+                .exceptionally(throwable -> {
+                    System.out.println(throwable.getMessage());
+                    return null;
+                });
+
+        completableFuture.completeExceptionally(new Exception("Complete Exceptionally"));
+
+        // It properly executed
+        assertTrue(completableFuture.isCompletedExceptionally());
+        assertThrows(Exception.class, completableFuture::get);
     }
 }
