@@ -129,6 +129,40 @@ public class BasicTest {
 
     @Test
     // TODO: Add Explanation
+    public void completeAsync() throws Exception {
+        // Begin lengthy computations
+        CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportLarge.sleep(defaultStringPayload));
+
+        // Complete this future with the result from the supplier
+        completableFuture.completeAsync(() -> transportSmall.deliveryPayload(defaultIntPayload));
+
+        // The get returns the result from the completeAsync call
+        assertEquals(completableFuture.get(), defaultIntPayload);
+        // The future is indeed finished
+        assertTrue(completableFuture.isDone());
+        // And it was not cancelled
+        assertFalse(completableFuture.isCancelled());
+    }
+
+    @Test
+    // TODO: Add Explanation
+    public void completeOnTimeout() throws Exception {
+        // Begin lengthy computations
+        CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportLarge.sleep(defaultStringPayload));
+
+        // Complete this future with the result from the supplier after the allotted time expires
+        completableFuture.completeOnTimeout(defaultIntPayload, 1, TimeUnit.MICROSECONDS);
+
+        // The get returns the result from the completeAsync call
+        assertEquals(completableFuture.get(), defaultIntPayload);
+        // The future is indeed finished
+        assertTrue(completableFuture.isDone());
+        // And it was not cancelled
+        assertFalse(completableFuture.isCancelled());
+    }
+
+    @Test
+    // TODO: Add Explanation
     public void get() throws Exception {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture_1 = CompletableFuture.supplyAsync(() -> transportLarge.deliveryPayload(defaultStringPayload));
@@ -199,12 +233,55 @@ public class BasicTest {
     public void obtrudeValue() throws Exception {
         // Begin lengthy computations
         CompletableFuture<Payload> completableFuture = CompletableFuture.supplyAsync(() -> transportSmall.deliveryPayload(defaultStringPayload));
-        // And its result is the payload_2 provided in the complete function
+        // And its result is from the supplier
         assertEquals(completableFuture.get(), defaultStringPayload);
 
         // Will override the existing value from the completion
         completableFuture.obtrudeValue(defaultIntPayload);
         // Contains the obtrudeValue() call's param
         assertEquals(defaultIntPayload, completableFuture.get());
+    }
+
+    @Test
+    // TODO: Add Explanation
+    public void completedFuture() throws Exception {
+        // Created a completed future
+        CompletableFuture<Payload> completableFuture = CompletableFuture.completedFuture(defaultStringPayload);
+        // And its result is a completed future that holds the result given above
+        assertEquals(completableFuture.get(), defaultStringPayload);
+        assertTrue(completableFuture.isDone());
+        assertFalse(completableFuture.isCancelled());
+    }
+
+    @Test
+    // TODO: Add Explanation
+    public void completedStage() {
+        // Create a completed completion stage
+        CompletionStage<Payload> completionStage = CompletableFuture.completedStage(defaultStringPayload);
+
+        // The stage can be operated on further
+        completionStage.thenRun(() -> transportSmall.deliveryPayload(defaultIntPayload));
+    }
+
+    @Test
+    // TODO: Add Explanation
+    public void failedFuture() {
+        // Create a completed completion stage
+        CompletableFuture<Payload> completableFuture = CompletableFuture.failedFuture(new Exception("Failed Future"));
+        // And its result is a completed future that holds the result given above
+        assertThrows(Exception.class, completableFuture::get);
+        assertTrue(completableFuture.isDone());
+        assertFalse(completableFuture.isCancelled());
+        assertTrue(completableFuture.isCompletedExceptionally());
+    }
+
+    @Test
+    // TODO: Add Explanation
+    public void failedStage() {
+        // Create a completed failed stage
+        CompletionStage<Payload> completionStage = CompletableFuture.failedStage(new Exception("Failed Stage"));
+
+        // The stage can still be operated on further, even if it failed
+        completionStage.thenRun(() -> transportSmall.deliveryPayload(defaultIntPayload));
     }
 }

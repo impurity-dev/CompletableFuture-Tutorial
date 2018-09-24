@@ -40,15 +40,18 @@ public class StagingTest {
 
     @Test
     // TODO: Explanation
-    public void thenAccept() throws Exception {
+    public void thenApply() throws Exception {
         // The payload we will be operating on currently has no bundle
         assertNull(defaultIntPayload.getBundle().peek());
 
         // Create our future
-        CompletableFuture<Payload<Integer>> completableFuture = CompletableFuture.supplyAsync(() -> defaultIntPayload);
-
-        // Once done, lets modify our payload by adding a bundle to it
-        completableFuture.thenAccept(payload ->  payload.addBundle(defaultStringPayload));
+        // Once done, lets modify our payload by adding a bundle to it in a BLOCKING manner
+        CompletableFuture<Payload> completableFuture = CompletableFuture
+                .supplyAsync(() -> transportSmall.deliveryPayload(defaultIntPayload))
+                .thenApplyAsync(payload ->  {
+                    payload.addBundle(defaultStringPayload);
+                    return payload;
+                });
         // Await its finish
         completableFuture.join();
 
@@ -58,7 +61,23 @@ public class StagingTest {
 
     @Test
     // TODO: Explanation
-    public void thenAcceptAsync() {
+    public void thenApplyAsync() throws Exception  {
+        // The payload we will be operating on currently has no bundle
+        assertNull(defaultIntPayload.getBundle().peek());
+
+        // Create our future
+        // Once done, lets modify our payload by adding a bundle to it in a NON-BLOCKING manner
+        CompletableFuture<Payload> completableFuture = CompletableFuture
+                .supplyAsync(() -> transportSmall.deliveryPayload(defaultIntPayload))
+                .thenApply(payload ->  {
+                    payload.addBundle(defaultStringPayload);
+                    return payload;
+                });
+        // Await its finish
+        completableFuture.join();
+
+        // The payload should have been modified to have a bundle
+        assertEquals(completableFuture.get().getBundle().peek(), defaultStringPayload);
     }
 
 }
